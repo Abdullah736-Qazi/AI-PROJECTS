@@ -1,0 +1,54 @@
+from collections import deque
+
+def generate_neighbors(node, grid):
+    neighbors = []
+    directions = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+    for dx, dy in directions:
+        new_x = node[0] + dx
+        new_y = node[1] + dy
+        if 0 <= new_x < len(grid) and 0 <= new_y < len(grid[0]) and not grid[new_x][new_y]:
+            neighbors.append((new_x, new_y))
+    return neighbors
+
+def bfs(start, goal, grid):
+    queue = deque()
+    queue.append((start, []))
+
+    while queue:
+        current, path = queue.popleft()
+
+        if current == goal:
+            return path + [current]
+
+        neighbors = generate_neighbors(current, grid)
+        for neighbor in neighbors:
+            if grid[neighbor[0]][neighbor[1]] != 1:
+                queue.append((neighbor, path + [current]))
+                grid[neighbor[0]][neighbor[1]] = 1
+
+    return None
+
+# Create the grid
+grid = [
+    [0, 1, 0, 0, 1, 0],
+    [0, 0, 0, 0, 1, 0],
+    [0, 0, 1, 0, 1, 0],
+    [0, 0, 1, 0, 1, 0],
+    [0, 0, 1, 0, 0, 0],
+    [0, 0, 1, 0, 0, 0]
+]
+
+# Define the start and goal locations
+start = (0, 0)
+goal = (0, 5)
+
+# Find the path using BFS
+path = bfs(start, goal, grid)
+
+# Print the path
+if path:
+    print("Path found from", start, "to", goal)
+    for step in path:
+        print(step)
+else:
+    print("No path found from", start, "to", goal)

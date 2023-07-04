@@ -1,0 +1,93 @@
+import math
+import heapq
+
+class Node:
+    def __init__(self, x, y, obstacle=False):
+        self.x = x
+        self.y = y
+        self.obstacle = obstacle
+        self.g = math.inf
+        self.h = math.inf
+        self.f = math.inf
+        self.parent = None
+
+    def __lt__(self, other):
+        return self.f < other.f
+
+def heuristic(node, goal):
+    return math.sqrt((node.x - goal.x) ** 2 + (node.y - goal.y) ** 2)
+
+def generate_neighbors(node, grid):
+    neighbors = []
+    directions = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+    for dx, dy in directions:
+        new_x = node.x + dx
+        new_y = node.y + dy
+        if 0 <= new_x < len(grid) and 0 <= new_y < len(grid[0]) and not grid[new_x][new_y].obstacle:
+            neighbors.append(grid[new_x][new_y])
+    return neighbors
+
+def a_star_search(start, goal, grid):
+    open_list = []
+    closed_set = set()
+
+    start.g = 0
+    start.h = heuristic(start, goal)
+    start.f = start.h
+    heapq.heappush(open_list, start)
+
+    while open_list:
+        current = heapq.heappop(open_list)
+
+        if current == goal:
+            path = []
+            while current:
+                path.append((current.x, current.y))
+                current = current.parent
+            return path[::-1]
+
+        closed_set.add(current)
+
+        neighbors = generate_neighbors(current, grid)
+        for neighbor in neighbors:
+            if neighbor in closed_set:
+                continue
+
+            g_score = current.g + 1
+            if g_score < neighbor.g:
+                neighbor.g = g_score
+                neighbor.h = heuristic(neighbor, goal)
+                neighbor.f = neighbor.g + neighbor.h
+                neighbor.parent = current
+
+            if neighbor not in open_list:
+                heapq.heappush(open_list, neighbor)
+
+    return None
+
+# Create the grid
+grid = [
+    [Node(x, y, obstacle=bool(val)) for y, val in enumerate(row)]
+    for x, row in enumerate([
+        [0, 1, 0, 0, 1, 0],
+        [0, 0, 0, 0, 1, 0],
+        [0, 0, 1, 0, 1, 0],
+        [0, 0, 1, 0, 1, 0],
+        [0, 0, 1, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0]
+    ])
+]
+
+# Define the start and goal locations
+start = grid[0][0]
+goal = grid[0][5]
+
+# Find the path using A* search
+path = a_star_search(start, goal, grid)
+
+# Print the path
+if path:
+    for step in path:
+        print(step)
+else:
+    print("No path found.")

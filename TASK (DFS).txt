@@ -1,0 +1,57 @@
+from collections import deque
+
+
+def generate_neighbors(node, grid):
+    neighbors = []
+    directions = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+    for dx, dy in directions:
+        new_x = node[0] + dx
+        new_y = node[1] + dy
+        if 0 <= new_x < len(grid) and 0 <= new_y < len(grid[0]) and not grid[new_x][new_y]:
+            neighbors.append((new_x, new_y))
+    return neighbors
+
+def dfs(current, goal, grid, visited, path):
+    if current == goal:
+        return True
+
+    visited.add(current)
+    neighbors = generate_neighbors(current, grid)
+
+    for neighbor in neighbors:
+        if neighbor not in visited:
+            path.append(neighbor)
+            if dfs(neighbor, goal, grid, visited, path):
+                return True
+            path.pop()
+
+    return False
+
+# Create the grid
+grid = [
+    [0, 1, 0, 0, 1, 0],
+    [0, 0, 0, 0, 1, 0],
+    [0, 0, 1, 0, 1, 0],
+    [0, 0, 1, 0, 1, 0],
+    [0, 0, 1, 0, 0, 0],
+    [0, 0, 1, 0, 0, 0]
+]
+
+# Define the start and goal locations
+start = (0, 0)
+goal = (0, 5)
+
+# Initialize visited set and path list
+visited = set()
+path = [start]
+
+# Find the path using DFS
+found_path = dfs(start, goal, grid, visited, path)
+
+# Print the result
+if found_path:
+    print("A path exists from", start, "to", goal)
+    for step in path:
+        print(step)
+else:
+    print("No path found from", start, "to", goal)
